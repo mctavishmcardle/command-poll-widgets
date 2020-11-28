@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+light -G | awk '{print int($1)}'
