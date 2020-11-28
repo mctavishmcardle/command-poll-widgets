@@ -3,14 +3,10 @@
 import os
 
 # Symbols to use for the different battery statuses
-BATTERY_STATUS_SYMBOLS = {
-    "Charging": "↑",
-    "Discharging": "↓",
-    "Full": "🔋"
-}
+BATTERY_STATUS_SYMBOLS = {"Charging": "↑", "Discharging": "↓", "Full": "🔋"}
 
 # `acpi -b` returns a complex string that we'll need to parse
-battery_output = os.popen('acpi -b').read()
+battery_output = os.popen("acpi -b").read()
 # There's only one battery, so ignore this label
 battery_output = battery_output.lstrip("Battery 0: ")
 
@@ -21,7 +17,9 @@ try:
     #   3. A "message", which can be a display of the time remaining for whatever
     #      operation the status entails (discharging or charging), depending on the
     #      rate
-    battery_status, battery_percent, battery_message = battery_output.split(", ", maxsplit=3)[:3]
+    battery_status, battery_percent, battery_message = battery_output.split(
+        ", ", maxsplit=3
+    )[:3]
 except ValueError:
     # If the battery is full, then there will be no message
     battery_status, battery_percent = battery_output.split(", ", maxsplit=2)[:2]
@@ -30,6 +28,6 @@ except ValueError:
 status_symbol = BATTERY_STATUS_SYMBOLS.get(battery_status, "")
 
 # Remove the '%' from the end of the percent readout
-battery_percent = battery_percent.rstrip().rstrip('%')
+battery_percent = battery_percent.rstrip().rstrip("%")
 
 print(f"{status_symbol}{battery_percent}")

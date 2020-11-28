@@ -14,6 +14,11 @@ It is likely that the scripts will need customization for use on other systems.
 Running `make` will copy the scripts to `/usr/local/bin` & the widget to the
 `awesome` local config dir, `~/.config/awesome`.
 
+# Development
+
+The `python` scripts in this project use `pipenv` for their development environment,
+and use `isort` & `black` for their formatting.
+
 # Origin
 
 `command-poll-widget.lua` is derived from the `brightness.lua` widget in
