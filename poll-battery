@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import collections
 import os
 import sys
 
@@ -9,7 +10,11 @@ import sys
 MINIMUM_BATTERY_WARNING = 10.0
 
 # Symbols to use for the different battery statuses
-BATTERY_STATUS_SYMBOLS = {"Charging": "↑", "Discharging": "↓", "Full": "🔋"}
+BATTERY_STATUS_SYMBOLS = collections.defaultdict(
+    # Default to a generic 'electricity' symbol in the case of an unknown status
+    lambda: "⚡",
+    **{"Charging": "↑", "Discharging": "↓", "Full": "🔋"},
+)
 
 # `acpi -b` returns a complex string that we'll need to parse
 battery_output = os.popen("acpi -b").read()
@@ -30,8 +35,7 @@ except ValueError:
     # If the battery is full, then there will be no message
     battery_status, battery_percent = battery_output.split(", ", maxsplit=2)[:2]
 
-# Default to no symbol in the case of an unknown status
-status_symbol = BATTERY_STATUS_SYMBOLS.get(battery_status, "")
+status_symbol = BATTERY_STATUS_SYMBOLS[battery_status]
 
 # Remove the '%' from the end of the percent readout
 battery_percent = battery_percent.rstrip().rstrip("%")
