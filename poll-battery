@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 
 import os
+import sys
+
+# The minimum battery percentage under which this command will exit with a nonzero
+# exit code. This will prompt `command-poll-widget` to set the display color to
+# the widget's `bad_exit_color`, if any.
+MINIMUM_BATTERY_WARNING = 10.0
 
 # Symbols to use for the different battery statuses
 BATTERY_STATUS_SYMBOLS = {"Charging": "↑", "Discharging": "↓", "Full": "🔋"}
@@ -31,3 +37,6 @@ status_symbol = BATTERY_STATUS_SYMBOLS.get(battery_status, "")
 battery_percent = battery_percent.rstrip().rstrip("%")
 
 print(f"{status_symbol}{battery_percent}")
+
+if float(battery_percent) < MINIMUM_BATTERY_WARNING:
+    sys.exit(1)

@@ -1,25 +1,43 @@
 #!/usr/bin/python3
 
+import collections
 import os
 import re
+import sys
 import typing
 
-VOLUME_ENABLED = {"[on]": "🔊", "[off]": "🔇"}
+ChannelInfo = typing.Tuple[str, str]
+
+VOLUME_ENABLED = collections.defaultdict(
+    # Default to an 'warning' icon
+    lambda: "🔔",
+    **{"[on]": "🔊", "[off]": "🔇"},
+)
 
 # `amixer sget Master` returns a complex string that we'll need to parse
 volume_output = os.popen("amixer sget Master").read()
 volume_output_lines = volume_output.strip().split("\n")
 
 
-def extract_channel_info(channel_status: str) -> typing.Tuple[str, str]:
+def extract_channel_info(channel_status: str) -> ChannelInfo:
+    """Get information on a specific channel
+
+    Args:
+        channel_status: The channel-specific status line coming out of `amixer`
+
+    Returns:
+        A tuple containing:
+            1. The "enabled" description for the channel
+            2. The volume percentage
+    """
     status_components = channel_status.split()
 
     return (
+        # A description whether the channel is enabled - should be a key in
+        # `VOLUME_ENABLED`
+        status_components[5],
         # Extract the volume percentage
         re.match("\[(\d{2,3})%\]", status_components[4]).group(1),
-        # Get the appropriate status symbol;
-        # if the status is missing from the map, display a warning icon
-        VOLUME_ENABLED.get(status_components[5], "🔔"),
     )
 
 
@@ -27,8 +45,26 @@ left_channel, right_channel = map(
     lambda channel: extract_channel_info(channel.strip()), volume_output_lines[5:7]
 )
 
+
+def format_channel_output(channel_info: ChannelInfo) -> str:
+    """Formats a channel's output for display
+
+    Args:
+        channel_info: The channel info (see `extract_channel_info`)
+
+    Returns:
+        The format display text
+    """
+    return f"{VOLUME_ENABLED[channel_info[0]]}{channel_info[1]}"
+
+
 # If the channels are unbalanced, display appropriately
 if left_channel != right_channel:
-    print("channels unbalanced")
+    print(
+        f"[{format_channel_output(left_channel)} {format_channel_output(right_channel)}]"
+    )
+    # Return a nonzero exit code, so the display widget can color the text
+    sys.exit(1)
+# Otherwise, arbitrarily use left channel, since they're the same
 else:
-    print(f"{left_channel[1]}{left_channel[0]}")
+    print(format_channel_output(left_channel))
